@@ -14,7 +14,7 @@ enum class CLDeviceType(val mask: Long) {
 	ALL(CL_DEVICE_TYPE_ALL);
 
 	companion object {
-		operator internal fun get(mask: Long) = CLDeviceType.values().first { it.checkMask(mask) }
+		internal fun get(mask: Long) = CLDeviceType.values().first { it.checkMask(mask) }
 	}
 
 	private constructor(mask: Int) : this(mask.toLong())
@@ -52,7 +52,7 @@ class CLDeviceFPConfig internal constructor(private val mask: Long) {
 	}
 }
 
-class CLDevice internal constructor(id: Long) : CLObject(id) {
+open class CLDevice internal constructor(id: Long) : CLObject(id) {
 	fun createContext() = CLContext(this)
 
 	private val info = CLInfoWrapper(id, ::clGetDeviceInfo)
@@ -101,21 +101,21 @@ class CLDevice internal constructor(id: Long) : CLObject(id) {
 	val name by info.string(CL_DEVICE_NAME)
 	// CL_DEVICE_NATIVE_VECTOR_WIDTH_x
 	val openCLCVersion by info.string(CL_DEVICE_OPENCL_C_VERSION)
-	val parentDevice by info.long(CL_DEVICE_PARENT_DEVICE).then { if (it == NULL) null else CLDevice(it) }
+	val parentDevice by info.ptr(CL_DEVICE_PARENT_DEVICE).then { if (it == NULL) null else CLDevice(it) }
 	val partitionMaxSubDevices by info.uint(CL_DEVICE_PARTITION_MAX_SUB_DEVICES)
 	// CL_DEVICE_PARTITION_PROPERTIES
 	// CL_DEVICE_PARTITION_AFFINITY_DOMAIN
 	// CL_DEVICE_PARTITION_TYPE
-	val platform by info.long(CL_DEVICE_PLATFORM).then(::CLPlatform)
+	val platform by info.ptr(CL_DEVICE_PLATFORM).then(::CLPlatform)
 	// CL_DEVICE_PREFERRED_VECTOR_WIDTH_x
 	val printfBufferSize by info.size_t(CL_DEVICE_PRINTF_BUFFER_SIZE)
 	val preferredInteropUserSync by info.bool(CL_DEVICE_PREFERRED_INTEROP_USER_SYNC)
 	val profile by info.string(CL_DEVICE_PROFILE)
 	val profilingTimerResolution by info.size_t(CL_DEVICE_PROFILING_TIMER_RESOLUTION)
 	// CL_DEVICE_QUEUE_PROPERTIES
-	val referenceCount by info.uint(CL_DEVICE_REFERENCE_COUNT)
+	//val referenceCount by info.uint(CL_DEVICE_REFERENCE_COUNT)
 	val singleFPConfig by info.ulong(CL_DEVICE_SINGLE_FP_CONFIG).then(::CLDeviceFPConfig)
-	val type by info.ptr(CL_DEVICE_TYPE).then { CLDeviceType[it] }
+	val type by info.ptr(CL_DEVICE_TYPE).then { CLDeviceType.get(it) }
 	val vendor by info.string(CL_DEVICE_VENDOR)
 	val vendorID by info.uint(CL_DEVICE_VENDOR_ID)
 	val version by info.string(CL_DEVICE_VERSION)
@@ -123,5 +123,3 @@ class CLDevice internal constructor(id: Long) : CLObject(id) {
 
 	override fun toString() = "${super.toString()}: $name ($type)"
 }
-
-fun Iterable<CLDevice>.createContext() = CLContext(this)
