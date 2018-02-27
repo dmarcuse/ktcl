@@ -7,7 +7,7 @@ import org.lwjgl.opencl.CL12.*
 class CLDevice internal constructor(id: Long) : CLObject(id) {
 	private val info = CLInfoWrapper(id, ::clGetDeviceInfo)
 
-	val addressBits by info.int(CL_DEVICE_ADDRESS_BITS)
+	val addressBits by info.uint(CL_DEVICE_ADDRESS_BITS)
 	val available by info.bool(CL_DEVICE_AVAILABLE)
 	val builtInKernels by info.string(CL_DEVICE_BUILT_IN_KERNELS).then { it.split(";") }
 	val compilerAvailable by info.bool(CL_DEVICE_COMPILER_AVAILABLE)
@@ -16,10 +16,10 @@ class CLDevice internal constructor(id: Long) : CLObject(id) {
 	val errorCorrectionSupported by info.bool(CL_DEVICE_ERROR_CORRECTION_SUPPORT)
 	val nativeKernelsSupported by info.int(CL_DEVICE_EXECUTION_CAPABILITIES).then { it and CL_EXEC_NATIVE_KERNEL != 0 }
 	val extensions by info.string(CL_DEVICE_EXTENSIONS).then { it.split(" ") }
-	val globalMemCacheSize by info.long(CL_DEVICE_GLOBAL_MEM_CACHE_SIZE)
+	val globalMemCacheSize by info.ulong(CL_DEVICE_GLOBAL_MEM_CACHE_SIZE)
 	val globalMemCacheReadable by info.int(CL_DEVICE_GLOBAL_MEM_CACHE_TYPE).then { it and (CL_READ_ONLY_CACHE or CL_READ_WRITE_CACHE) != 0 }
 	val globalMemCacheWritable by info.int(CL_DEVICE_GLOBAL_MEM_CACHE_TYPE).then { it and CL_READ_WRITE_CACHE != 0 }
-	val globalMemCachelineSize by info.long(CL_DEVICE_GLOBAL_MEM_CACHELINE_SIZE)
+	val globalMemCachelineSize by info.uint(CL_DEVICE_GLOBAL_MEM_CACHELINE_SIZE)
 	val globalMemSize by info.long(CL_DEVICE_GLOBAL_MEM_SIZE)
 	// CL_DEVICE_HALF_FP_CONFIG
 	val hostUnifiedMemory by info.bool(CL_DEVICE_HOST_UNIFIED_MEMORY)
@@ -29,5 +29,22 @@ class CLDevice internal constructor(id: Long) : CLObject(id) {
 	val image3dMaxDepth by info.size_t(CL_DEVICE_IMAGE3D_MAX_DEPTH)
 	val image3dMaxHeight by info.size_t(CL_DEVICE_IMAGE3D_MAX_HEIGHT)
 	val image3dMaxWidth by info.size_t(CL_DEVICE_IMAGE3D_MAX_WIDTH)
+	val imageMaxBufferSize by info.size_t(CL_DEVICE_IMAGE_MAX_BUFFER_SIZE)
+	val imageMaxArraySize by info.size_t(CL_DEVICE_IMAGE_MAX_ARRAY_SIZE)
+	val linkerAvailable by info.bool(CL_DEVICE_LINKER_AVAILABLE)
+	val localMemSize by info.ulong(CL_DEVICE_LOCAL_MEM_SIZE)
+	// CL_DEVICE_LOCAL_MEM_SIZE
+	val maxClockFrequency by info.uint(CL_DEVICE_MAX_CLOCK_FREQUENCY)
+	val maxComputeUnts by info.uint(CL_DEVICE_MAX_COMPUTE_UNITS)
+	val maxConstantArgs by info.uint(CL_DEVICE_MAX_CONSTANT_ARGS)
+	val maxConstantBufferSize by info.ulong(CL_DEVICE_MAX_CONSTANT_BUFFER_SIZE)
+	val maxMemAllocSize by info.ulong(CL_DEVICE_MAX_MEM_ALLOC_SIZE)
+	val maxParameterSize by info.size_t(CL_DEVICE_MAX_PARAMETER_SIZE)
+	val maxReadImageArgs by info.uint(CL_DEVICE_MAX_READ_IMAGE_ARGS)
+	val maxSamplers by info.uint(CL_DEVICE_MAX_SAMPLERS)
+	val maxWorkGroupSize by info.size_t(CL_DEVICE_MAX_WORK_GROUP_SIZE)
+	val maxWorkItemDimensions by info.uint(CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS)
+	// CL_DEVICE_MAX_WORK_ITEM_SIZES
+	val maxWriteImageArgs by info.uint(CL_DEVICE_MAX_WRITE_IMAGE_ARGS)
 	
 }
