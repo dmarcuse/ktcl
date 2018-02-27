@@ -45,4 +45,14 @@ class CLProgram internal constructor(id: Long) : CLObject(id) {
 		
 		return this
 	}
+	
+	fun createKernel(name: String): CLKernel {
+		require(buildState == CLProgramBuildState.SUCCESS) { "Program not successfully built" }
+		
+		val errBuf = BufferUtils.createIntBuffer(1)
+		val kernel = clCreateKernel(id, name, errBuf)
+		checkCLError(errBuf[0])
+		
+		return CLKernel(kernel)
+	}
 }
