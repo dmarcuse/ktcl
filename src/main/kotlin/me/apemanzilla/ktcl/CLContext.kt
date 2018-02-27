@@ -15,7 +15,7 @@ class CLContext internal constructor(id: Long) : CLObject(id) {
 			devBuf.rewind()
 			
 			val errBuf = BufferUtils.createIntBuffer(1)
-			val ctx = clCreateContext(null, devBuf, null, NULL, errBuf)
+			val ctx = clCreateContext(BufferUtils.createPointerBuffer(1).put(0).rewind(), devBuf, null, NULL, errBuf)
 			checkCLError(errBuf[0])
 			return ctx
 		}

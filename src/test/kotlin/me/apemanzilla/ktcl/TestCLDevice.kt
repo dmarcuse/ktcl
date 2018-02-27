@@ -14,9 +14,7 @@ class TestCLDevice {
 	fun testAllDevicesInfo() {
 		getPlatforms().flatMap { it.getDevices() }.forEach { device ->
 			println("All info for $device:")
-			CLDevice::class.members.mapNotNull { it as? KProperty }.filter { it.visibility == PUBLIC }.forEach {
-				prop -> println(" -> ${prop.name} = ${prop.getter.call(device)}")
-			}
+			CLDevice::class.props().forEach { println(" -> ${it.name} = ${it.get(device)}")}
 		}
 	}
 }
