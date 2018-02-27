@@ -3,6 +3,7 @@ package me.apemanzilla.ktcl
 import org.lwjgl.opencl.CL10.*
 import org.lwjgl.opencl.CL11.*
 import org.lwjgl.opencl.CL12.*
+import org.lwjgl.system.MemoryUtil.NULL
 
 class CLDevice internal constructor(id: Long) : CLObject(id) {
 	private val info = CLInfoWrapper(id, ::clGetDeviceInfo)
@@ -46,5 +47,30 @@ class CLDevice internal constructor(id: Long) : CLObject(id) {
 	val maxWorkItemDimensions by info.uint(CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS)
 	// CL_DEVICE_MAX_WORK_ITEM_SIZES
 	val maxWriteImageArgs by info.uint(CL_DEVICE_MAX_WRITE_IMAGE_ARGS)
+	val memBaseAddrAlign by info.uint(CL_DEVICE_MEM_BASE_ADDR_ALIGN)
+	val minDataTypeAlignSize by info.uint(CL_DEVICE_MIN_DATA_TYPE_ALIGN_SIZE)
+	val name by info.string(CL_DEVICE_NAME)
+	// CL_DEVICE_NATIVE_VECTOR_WIDTH_x
+	val openCLCVersion by info.string(CL_DEVICE_OPENCL_C_VERSION)
+	val parentDevice by info.long(CL_DEVICE_PARENT_DEVICE).then { if(it == NULL) null else CLDevice(it) }
+	val partitionMaxSubDevices by info.uint(CL_DEVICE_PARTITION_MAX_SUB_DEVICES)
+	// CL_DEVICE_PARTITION_PROPERTIES
+	// CL_DEVICE_PARTITION_AFFINITY_DOMAIN
+	// CL_DEVICE_PARTITION_TYPE
+	val platform by info.long(CL_DEVICE_PLATFORM).then(::CLPlatform)
+	// CL_DEVICE_PREFERRED_VECTOR_WIDTH_x
+	val printfBufferSize by info.size_t(CL_DEVICE_PRINTF_BUFFER_SIZE)
+	val preferredInteropUserSync by info.bool(CL_DEVICE_PREFERRED_INTEROP_USER_SYNC)
+	val profile by info.string(CL_DEVICE_PROFILE)
+	val profilingTimerResolution by info.size_t(CL_DEVICE_PROFILING_TIMER_RESOLUTION)
+	// CL_DEVICE_QUEUE_PROPERTIES
+	val referenceCount by info.uint(CL_DEVICE_REFERENCE_COUNT)
+	// CL_DEVICE_SINGLE_FP_CONFIG
+	// CL_DEVICE_TYPE
+	val vendor by info.string(CL_DEVICE_VENDOR)
+	val vendorID by info.uint(CL_DEVICE_VENDOR_ID)
+	val version by info.string(CL_DEVICE_VERSION)
+	val driverVersion by info.string(CL_DRIVER_VERSION)
 	
+	override fun toString() = "${super.toString()}: $name"
 }

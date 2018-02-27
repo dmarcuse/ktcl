@@ -18,6 +18,6 @@ fun ByteBuffer.toArray(): ByteArray {
 
 fun ByteBuffer.readString() = String(toArray(), Charsets.UTF_8).replace(Regex("\u0000$"), "")
 
-inline fun <A, B, C> ReadOnlyProperty<A,B>.then(crossinline transform: (B) -> C) = object : ReadOnlyProperty<A, C> {
+inline fun <A, B, C> ReadOnlyProperty<A, B>.then(crossinline transform: (B) -> C) = object : ReadOnlyProperty<A, C> {
 	override operator fun getValue(thisRef: A, property: KProperty<*>) = transform(this@then.getValue(thisRef, property))
 }

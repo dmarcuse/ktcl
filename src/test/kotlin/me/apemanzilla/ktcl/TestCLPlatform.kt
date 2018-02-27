@@ -6,9 +6,7 @@ import org.junit.Before
 
 class TestCLPlatform {
 	@Before
-	fun checkPlatformsAvailable() {
-		Assume.assumeTrue(getPlatforms().size > 0)
-	}
+	fun checkPlatformsAvailable() = Assume.assumeTrue(getPlatforms().size > 0)
 	
 	@Test
 	fun testGetDefaultPlatform() {
@@ -21,7 +19,7 @@ class TestCLPlatform {
 	}
 	
 	@Test
-	fun testAllPlatformInfo() {
+	fun testAllPlatformsInfo() {
 		getPlatforms().forEach {
 			println("Complete info for $it")
 			
