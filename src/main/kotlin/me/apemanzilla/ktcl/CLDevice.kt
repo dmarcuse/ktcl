@@ -5,14 +5,63 @@ import org.lwjgl.opencl.CL11.*
 import org.lwjgl.opencl.CL12.*
 import org.lwjgl.system.MemoryUtil.NULL
 
+enum class CLDeviceType(val mask: Long) {
+	CPU(CL_DEVICE_TYPE_CPU),
+	GPU(CL_DEVICE_TYPE_GPU),
+	ACCELERATOR(CL_DEVICE_TYPE_ACCELERATOR),
+	CUSTOM(CL_DEVICE_TYPE_CUSTOM),
+	DEFAULT(CL_DEVICE_TYPE_DEFAULT),
+	ALL(CL_DEVICE_TYPE_ALL);
+
+	companion object {
+		operator internal fun get(mask: Long) = CLDeviceType.values().first { it.checkMask(mask) }
+	}
+
+	private constructor(mask: Int) : this(mask.toLong())
+
+	internal fun checkMask(otherMask: Long) = (otherMask and mask) == otherMask
+}
+
+class CLDeviceFPConfig internal constructor(private val mask: Long) {
+	private fun checkMask(otherMask: Long) = (mask and otherMask) == otherMask
+	private fun checkMask(otherMask: Int) = checkMask(otherMask.toLong())
+
+	val denorms = checkMask(CL_FP_DENORM)
+	val inf = checkMask(CL_FP_INF_NAN)
+	val nan = checkMask(CL_FP_INF_NAN)
+	val roundToNearest = checkMask(CL_FP_ROUND_TO_NEAREST)
+	val roundToZero = checkMask(CL_FP_ROUND_TO_ZERO)
+	val roundToInf = checkMask(CL_FP_ROUND_TO_INF)
+	val fma = checkMask(CL_FP_FMA)
+	val correctlyRoundedDivideSqrt = checkMask(CL_FP_CORRECTLY_ROUNDED_DIVIDE_SQRT)
+	val softFloat = checkMask(CL_FP_SOFT_FLOAT)
+	
+	override fun toString(): String {
+		val map = mapOf(
+				"denorms" to denorms,
+				"inf" to inf,
+				"nan" to nan,
+				"roundToNearest" to roundToNearest,
+				"roundToZero" to roundToZero,
+				"roundToInf" to roundToInf,
+				"fma" to fma,
+				"correctlyRoundedDivideSqrt" to correctlyRoundedDivideSqrt,
+				"softFloat" to softFloat)
+		
+		return map.filter { it.value }.map { it.key }.joinToString(" ", "Supported: ")
+	}
+}
+
 class CLDevice internal constructor(id: Long) : CLObject(id) {
+	fun createContext() = CLContext(this)
+
 	private val info = CLInfoWrapper(id, ::clGetDeviceInfo)
 
 	val addressBits by info.uint(CL_DEVICE_ADDRESS_BITS)
 	val available by info.bool(CL_DEVICE_AVAILABLE)
 	val builtInKernels by info.string(CL_DEVICE_BUILT_IN_KERNELS).then { it.split(";") }
 	val compilerAvailable by info.bool(CL_DEVICE_COMPILER_AVAILABLE)
-	// CL_DEVICE_DOUBLE_FP_CONFIG
+	val doubleFPConfig by info.ulong(CL_DEVICE_DOUBLE_FP_CONFIG).then(::CLDeviceFPConfig)
 	val littleEndian by info.bool(CL_DEVICE_ENDIAN_LITTLE)
 	val errorCorrectionSupported by info.bool(CL_DEVICE_ERROR_CORRECTION_SUPPORT)
 	val nativeKernelsSupported by info.int(CL_DEVICE_EXECUTION_CAPABILITIES).then { it and CL_EXEC_NATIVE_KERNEL != 0 }
@@ -52,7 +101,7 @@ class CLDevice internal constructor(id: Long) : CLObject(id) {
 	val name by info.string(CL_DEVICE_NAME)
 	// CL_DEVICE_NATIVE_VECTOR_WIDTH_x
 	val openCLCVersion by info.string(CL_DEVICE_OPENCL_C_VERSION)
-	val parentDevice by info.long(CL_DEVICE_PARENT_DEVICE).then { if(it == NULL) null else CLDevice(it) }
+	val parentDevice by info.long(CL_DEVICE_PARENT_DEVICE).then { if (it == NULL) null else CLDevice(it) }
 	val partitionMaxSubDevices by info.uint(CL_DEVICE_PARTITION_MAX_SUB_DEVICES)
 	// CL_DEVICE_PARTITION_PROPERTIES
 	// CL_DEVICE_PARTITION_AFFINITY_DOMAIN
@@ -65,12 +114,14 @@ class CLDevice internal constructor(id: Long) : CLObject(id) {
 	val profilingTimerResolution by info.size_t(CL_DEVICE_PROFILING_TIMER_RESOLUTION)
 	// CL_DEVICE_QUEUE_PROPERTIES
 	val referenceCount by info.uint(CL_DEVICE_REFERENCE_COUNT)
-	// CL_DEVICE_SINGLE_FP_CONFIG
-	// CL_DEVICE_TYPE
+	val singleFPConfig by info.ulong(CL_DEVICE_SINGLE_FP_CONFIG).then(::CLDeviceFPConfig)
+	val type by info.ptr(CL_DEVICE_TYPE).then { CLDeviceType[it] }
 	val vendor by info.string(CL_DEVICE_VENDOR)
 	val vendorID by info.uint(CL_DEVICE_VENDOR_ID)
 	val version by info.string(CL_DEVICE_VERSION)
 	val driverVersion by info.string(CL_DRIVER_VERSION)
-	
-	override fun toString() = "${super.toString()}: $name"
+
+	override fun toString() = "${super.toString()}: $name ($type)"
 }
+
+fun Iterable<CLDevice>.createContext() = CLContext(this)

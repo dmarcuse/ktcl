@@ -32,6 +32,7 @@ class CLInfoWrapper(val infoFunc: (Int, ByteBuffer?, PointerBuffer?) -> Int) {
 	fun getInfoByte(paramName: Int) = getInfoRaw(paramName)[0]
 	fun getInfoBool(paramName: Int) = getInfoInt(paramName) == CL_TRUE
 	fun getInfoSizet(paramName: Int) = getInfoRaw(paramName).let(PointerBuffer::create)[0]
+	fun getInfoPtr(paramName: Int) = getInfoSizet(paramName)
 
 	fun string(paramName: Int) = CLInfoDelegate(paramName, this::getInfoString)
 	fun int(paramName: Int) = CLInfoDelegate(paramName, this::getInfoInt)
@@ -41,6 +42,7 @@ class CLInfoWrapper(val infoFunc: (Int, ByteBuffer?, PointerBuffer?) -> Int) {
 	fun byte(paramName: Int) = CLInfoDelegate(paramName, this::getInfoByte)
 	fun bool(paramName: Int) = CLInfoDelegate(paramName, this::getInfoBool)
 	fun size_t(paramName: Int) = CLInfoDelegate(paramName, this::getInfoSizet)
+	fun ptr(paramName: Int) = size_t(paramName)
 }
 
 fun Int.uint() = Math.toIntExact(Integer.toUnsignedLong(this))
