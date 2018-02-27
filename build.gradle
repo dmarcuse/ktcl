@@ -1,0 +1,33 @@
+plugins {
+	id 'org.jetbrains.kotlin.jvm' version '1.2.21'
+	id 'eclipse'
+	id 'idea'
+}
+
+group = 'me.apemanzilla'
+version = '0.1.0'
+
+eclipse.project {
+	natures 'org.eclipse.buildship.core.gradleprojectnature'
+	natures 'org.jetbrains.kotlin.core.kotlinNature'
+}
+
+repositories {
+	mavenLocal()
+	mavenCentral()
+}
+
+project.ext.lwjglVersion = '3.1.6'
+
+dependencies {
+	implementation 'org.jetbrains.kotlin:kotlin-stdlib'
+	implementation 'org.jetbrains.kotlin:kotlin-reflect:1.2.21'
+
+	implementation "org.lwjgl:lwjgl:$lwjglVersion"
+	implementation "org.lwjgl:lwjgl-opencl:$lwjglVersion"
+	implementation "org.lwjgl:lwjgl:$lwjglVersion:natives-windows"
+	implementation "org.lwjgl:lwjgl:$lwjglVersion:natives-linux"
+	implementation "org.lwjgl:lwjgl:$lwjglVersion:natives-macos"
+	
+	testImplementation 'junit:junit:4.12'
+}
