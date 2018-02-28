@@ -7,6 +7,13 @@ plugins {
 group = 'me.apemanzilla'
 version = '0.1.0'
 
+compileKotlin {
+	kotlinOptions {
+		jvmTarget = '1.8'
+		javaParameters = true
+	}
+}
+
 eclipse.project {
 	natures 'org.eclipse.buildship.core.gradleprojectnature'
 	natures 'org.jetbrains.kotlin.core.kotlinNature'
@@ -17,11 +24,14 @@ repositories {
 	mavenCentral()
 }
 
+project.ext.kotlinVersion = '1.2.21'
 project.ext.lwjglVersion = '3.1.6'
+project.ext.junitVersion = '5.1.0'
 
 dependencies {
-	implementation 'org.jetbrains.kotlin:kotlin-stdlib'
-	implementation 'org.jetbrains.kotlin:kotlin-reflect:1.2.21'
+	implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+	implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
+	implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
 
 	implementation "org.lwjgl:lwjgl:$lwjglVersion"
 	implementation "org.lwjgl:lwjgl-opencl:$lwjglVersion"
@@ -29,5 +39,10 @@ dependencies {
 	implementation "org.lwjgl:lwjgl:$lwjglVersion:natives-linux"
 	implementation "org.lwjgl:lwjgl:$lwjglVersion:natives-macos"
 	
-	testImplementation 'junit:junit:4.12'
+	testCompile "org.junit.jupiter:junit-jupiter-api:$junitVersion"
+	testRuntime "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
+}
+
+test {
+	useJUnitPlatform()
 }

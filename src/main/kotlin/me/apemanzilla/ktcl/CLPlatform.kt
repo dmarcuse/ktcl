@@ -7,19 +7,21 @@ import org.lwjgl.opencl.CL12.*
 import java.nio.IntBuffer
 
 class CLPlatform internal constructor(id: Long) : CLObject(id) {
-	fun getDevices(type: CLDeviceType = CLDeviceType.ALL): List<CLDevice> {
-		val sizeBuf = BufferUtils.createIntBuffer(1)		
+	fun getDevices(type: CLDeviceType): List<CLDevice> {
+		val sizeBuf = BufferUtils.createIntBuffer(1)
 		checkCLError(clGetDeviceIDs(id, type.mask.toLong(), null, sizeBuf))
-		
+
 		val devices = BufferUtils.createPointerBuffer(sizeBuf[0])
 		checkCLError(clGetDeviceIDs(id, type.mask.toLong(), devices, null as IntBuffer?))
 		return List(sizeBuf[0]) { i -> CLDevice(devices[i]) }
 	}
-	
+
+	fun getDevices() = getDevices(CLDeviceType.ALL)
+
 	fun unloadCompiler() = checkCLError(clUnloadPlatformCompiler(id))
-	
+
 	private val info = CLInfoWrapper(id, ::clGetPlatformInfo)
-	
+
 	val profile by info.string(CL_PLATFORM_PROFILE)
 	val version by info.string(CL_PLATFORM_VERSION)
 	val name by info.string(CL_PLATFORM_NAME)
