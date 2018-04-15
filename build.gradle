@@ -1,5 +1,5 @@
 plugins {
-	id 'org.jetbrains.kotlin.jvm' version '1.2.21'
+	id 'org.jetbrains.kotlin.jvm' version '1.2.31'
 	id 'eclipse'
 	id 'idea'
 }
@@ -24,14 +24,12 @@ repositories {
 	mavenCentral()
 }
 
-project.ext.kotlinVersion = '1.2.21'
 project.ext.lwjglVersion = '3.1.6'
 project.ext.junitVersion = '5.1.0'
 
 dependencies {
-	implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
-	implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
-	implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
+	implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+	implementation "org.jetbrains.kotlin:kotlin-reflect"
 
 	implementation "org.lwjgl:lwjgl:$lwjglVersion"
 	implementation "org.lwjgl:lwjgl-opencl:$lwjglVersion"
@@ -40,6 +38,7 @@ dependencies {
 	implementation "org.lwjgl:lwjgl:$lwjglVersion:natives-macos"
 	
 	testCompile "org.junit.jupiter:junit-jupiter-api:$junitVersion"
+	testCompile "org.junit.jupiter:junit-jupiter-params:$junitVersion"
 	testRuntime "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
 }
 

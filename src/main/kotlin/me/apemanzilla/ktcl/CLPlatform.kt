@@ -1,43 +1,44 @@
 package me.apemanzilla.ktcl
 
 import org.lwjgl.BufferUtils
+import org.lwjgl.opencl.CL.createPlatformCapabilities
 import org.lwjgl.opencl.CL10.*
-import org.lwjgl.opencl.CL11.*
-import org.lwjgl.opencl.CL12.*
-import java.nio.IntBuffer
+import org.lwjgl.opencl.CL21.CL_PLATFORM_HOST_TIMER_RESOLUTION
+import org.lwjgl.opencl.KHRICD.CL_PLATFORM_ICD_SUFFIX_KHR
 
-class CLPlatform internal constructor(id: Long) : CLObject(id) {
-	fun getDevices(type: CLDeviceType): List<CLDevice> {
-		val sizeBuf = BufferUtils.createIntBuffer(1)
-		checkCLError(clGetDeviceIDs(id, type.mask.toLong(), null, sizeBuf))
+/**
+ * An OpenCL platform
+ */
+class CLPlatform internal constructor(handle: Long) : CLObject(handle) {
+	internal val caps by lazy { createPlatformCapabilities(handle) }
+	private val info = CLInfo(handle, ::clGetPlatformInfo, ::caps)
 
-		val devices = BufferUtils.createPointerBuffer(sizeBuf[0])
-		checkCLError(clGetDeviceIDs(id, type.mask.toLong(), devices, null as IntBuffer?))
-		return List(sizeBuf[0]) { i -> CLDevice(devices[i]) }
-	}
+	val profile by info.string(CL_PLATFORM_PROFILE).CL10()
+	val version by info.string(CL_PLATFORM_VERSION).CL10()
+	val name by info.string(CL_PLATFORM_NAME).CL10()
+	val vendor by info.string(CL_PLATFORM_VENDOR).CL10()
+	val extensions by info.string(CL_PLATFORM_EXTENSIONS).CL10()
+	val hostTimerResolution by info.ulong(CL_PLATFORM_HOST_TIMER_RESOLUTION).CL21()
+	val icdSuffix get() = if (extensions.contains("cl_khr_icd")) info.getString(CL_PLATFORM_ICD_SUFFIX_KHR) else null
 
-	fun getDevices() = getDevices(CLDeviceType.ALL)
+	override fun toString() = "CLPlatform %s [0x%x]".format(name, handle)
 
-	fun unloadCompiler() = checkCLError(clUnloadPlatformCompiler(id))
-
-	private val info = CLInfoWrapper(id, ::clGetPlatformInfo)
-
-	val profile by info.string(CL_PLATFORM_PROFILE)
-	val version by info.string(CL_PLATFORM_VERSION)
-	val name by info.string(CL_PLATFORM_NAME)
-	val vendor by info.string(CL_PLATFORM_VENDOR)
-	val extensions by info.string(CL_PLATFORM_EXTENSIONS).then { it.split(" ") }
-
-	override fun toString() = "${super.toString()}: $name"
+	/**
+	 * Gets devices of the given type from this platform.
+	 * @param type The device type. Defaults to the `ALL` device type, which selects all non-custom devices.
+	 */
+	fun getDevices(type: CLDevice.Type = CLDevice.Type.ALL) = getDevices(this, type)
 }
 
-fun getPlatforms(): List<CLPlatform> {
+/**
+ * Gets all available platforms
+ */
+fun getAllPlatforms(): List<CLPlatform> {
 	val sizeBuf = BufferUtils.createIntBuffer(1)
 	checkCLError(clGetPlatformIDs(null, sizeBuf))
+	sizeBuf.rewind()
 
-	val platforms = BufferUtils.createPointerBuffer(sizeBuf[0])
-	checkCLError(clGetPlatformIDs(platforms, null as IntBuffer?))
-	return List(sizeBuf[0]) { i -> CLPlatform(platforms[i]) }
+	val platsBuf = BufferUtils.createPointerBuffer(sizeBuf[0])
+	checkCLError(clGetPlatformIDs(platsBuf, sizeBuf))
+	return List(sizeBuf[0]) { i -> CLPlatform(platsBuf[i]) }
 }
-
-fun getDefaultPlatform() = getPlatforms().first()

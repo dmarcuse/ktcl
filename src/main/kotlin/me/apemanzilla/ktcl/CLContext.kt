@@ -1,68 +1,65 @@
 package me.apemanzilla.ktcl
 
-import org.lwjgl.opencl.CL10.*
-import org.lwjgl.opencl.CL11.*
-import org.lwjgl.opencl.CL12.*
-import org.lwjgl.PointerBuffer
 import org.lwjgl.BufferUtils
+import org.lwjgl.opencl.CL10.*
+import org.lwjgl.opencl.CL11.CL_CONTEXT_NUM_DEVICES
 import org.lwjgl.system.MemoryUtil.NULL
 
-class CLContext internal constructor(id: Long) : CLObject(id) {
+/**
+ * An OpenCL context
+ */
+class CLContext : CLObject {
+	/**
+	 * Configurable options used when creating a [CLContext]
+	 */
+	data class Properties(
+			val platform: CLPlatform,
+			val interopUserSync: Boolean? = null,
+			val terminable: Boolean? = null
+	)
+
+	/**
+	 * Creates a context from an existing handle, calling [clRetainContext].
+	 * Should not be used for new contexts, only existing ones.
+	 */
+	internal constructor(handle: Long) : super(handle, ::clReleaseContext) {
+		checkCLError(clRetainContext(handle))
+	}
+
 	private companion object {
-		fun createContextInternal(devices: Iterable<CLDevice>): Long {
-			val devBuf = BufferUtils.createPointerBuffer(devices.count())
-			devices.map(CLDevice::id).forEach { devBuf.put(it) }
-			devBuf.rewind()
-
+		fun createCtx(devs: Iterable<CLDevice>): Long {
+			val propBuf = BufferUtils.createPointerBuffer(1).put(NULL).flip()
+			val devBuf = BufferUtils.createPointerBuffer(devs.count()).put(devs.map { it.handle }.toLongArray()).flip()
 			val errBuf = BufferUtils.createIntBuffer(1)
-			val ctx = clCreateContext(BufferUtils.createPointerBuffer(1).put(NULL).rewind(), devBuf, null, NULL, errBuf)
+
+			val handle = clCreateContext(propBuf, devBuf, null, NULL, errBuf)
 			checkCLError(errBuf[0])
-			return ctx
+			return handle
 		}
 	}
 
-	internal constructor(device: CLDevice) : this(createContextInternal(listOf(device)))
-	internal constructor(devices: Iterable<CLDevice>) : this(createContextInternal(devices))
+	/**
+	 * Creates a new context containing the given device
+	 *
+	 * @param dev The [CLDevice] this context uses
+	 */
+	constructor(dev: CLDevice) : super(createCtx(listOf(dev)), ::clReleaseContext)
 
-	fun createCommandQueue(device: CLDevice): CLCommandQueue {
-		val errBuf = BufferUtils.createIntBuffer(1)
-		val queue = clCreateCommandQueue(id, device.id, NULL, errBuf)
-		checkCLError(errBuf[0])
-		return CLCommandQueue(queue)
+	/**
+	 * Creates a new context containing the given devices
+	 *
+	 * @param devs The [CLDevice]s this context uses
+	 */
+	constructor(devs: Iterable<CLDevice>) : super(createCtx(devs), ::clReleaseContext) {
+		require(devs.any()) { "At least one device required" }
 	}
 
-	fun createProgram(sources: Collection<String>): CLProgram {
-		require(sources.size >= 1) { "Must have at least one source" }
-		require(sources.none(String::isEmpty)) { "Sources must not be empty" }
+	private val info: CLInfo = CLInfo(handle, ::clGetContextInfo)
 
-		val errBuf = BufferUtils.createIntBuffer(1)
-		val program = clCreateProgramWithSource(id, sources.toTypedArray(), errBuf)
-		checkCLError(errBuf[0])
-		return CLProgram(program)
-	}
-
-	private val info = CLInfoWrapper(id, ::clGetContextInfo)
-
-	//val referenceCount by info.uint(CL_CONTEXT_REFERENCE_COUNT)
+	val referenceCount by info.uint(CL_CONTEXT_REFERENCE_COUNT)
 	val numDevices by info.uint(CL_CONTEXT_NUM_DEVICES)
-	val devices get() = info.getInfoRaw(CL_CONTEXT_DEVICES).let(PointerBuffer::create).let { buf -> List(buf.remaining()) { i -> CLDevice(buf[i]) } }
-
-	override fun toString() = "${super.toString()}: $numDevices device(s) $devices"
-}
-
-fun Iterable<CLDevice>.createContext() = CLContext(this)
-
-fun createDefaultContext(type: CLDeviceType = CLDeviceType.ALL): CLContext {
-	val errBuf = BufferUtils.createIntBuffer(1)
-	val propsBuf = BufferUtils.createPointerBuffer(3).put(CL_CONTEXT_PLATFORM.toLong()).put(getDefaultPlatform().id).put(NULL).rewind()
-	val ctx = clCreateContextFromType(propsBuf, type.mask, null, NULL, errBuf)
-	checkCLError(errBuf[0]) { errCode ->
-		when (errCode) {
-			CL_INVALID_PLATFORM -> RuntimeException("No OpenCL platforms available")
-			CL_DEVICE_NOT_AVAILABLE -> RuntimeException("No OpenCL device of type $type available")
-			else -> null
-		}
-	}
-
-	return CLContext(ctx)
+	val devices by lazy { info.getPointers(CL_CONTEXT_DEVICES).map(::CLDevice) }
+	// CL_CONTEXT_PROPERTIES
+	// CL_CONTEXT_D3D10_PREFER_SHARED_RESOURCES
+	// CL_CONTEXT_D3D11_PREFER_SHARED_RESOURCES
 }

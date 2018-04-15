@@ -1,33 +1,41 @@
 package me.apemanzilla.ktcl
 
-import org.junit.jupiter.api.Assumptions.assumeTrue
-import org.junit.jupiter.api.BeforeEach
+import me.apemanzilla.ktcl.CLContext
+import me.apemanzilla.ktcl.getAllPlatforms
+import me.apemanzilla.ktcl.getDevices
+import org.junit.jupiter.api.Assumptions
+import org.junit.jupiter.api.DynamicContainer.dynamicContainer
+import org.junit.jupiter.api.DynamicTest.dynamicTest
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
-import org.junit.jupiter.api.DynamicContainer.*
 
 class BasicTests {
-	@BeforeEach
-	fun `check platforms available`() = assumeTrue(anyPlatforms()) { "No OpenCL platforms available" }.eatResult()
-
-	@BeforeEach
-	fun `check devices available`() = assumeTrue(anyDevices()) { "No OpenCL devices available" }.eatResult()
+	@TestFactory
+	fun `test platforms`() = getAllPlatforms().map { p ->
+		dynamicContainer("test platform ${p.name}", listOf(
+				dynamicContainer("test platform properties", evaluateEachProperty(p)),
+				*(p.getDevices().map { d ->
+					dynamicContainer("test device ${d.name}", evaluateEachProperty(d))
+				}.toTypedArray())
+		))
+	}
 
 	@Test
-	fun `test getDefaultPlatform`() = getDefaultPlatform().eatResult()
+	fun `test getDevices without platform`() {
+		getDevices()
+	}
 
 	@TestFactory
-	fun `test CLPlatform properties`() = getPlatforms().map(::createPropertyTest)
+	fun `test create multi-device context`() = getAllPlatforms().map { platform ->
+		dynamicTest("create context from all standard devices in $platform") {
+			val devices = platform.getDevices()
+			Assumptions.assumeTrue(devices.any())
+			val ctx = CLContext(platform.getDevices())
+		}
+	}
 
 	@TestFactory
-	fun `test CLDevice properties`() = standardDevices().map(::createPropertyTest)
-
-	@Test
-	fun `test createDefaultContext`() = createDefaultContext().eatResult()
-
-	@TestFactory
-	fun `test single-device contexts`() = standardDevices().map(CLDevice::createContext).map(::createPropertyTest)
-
-	@TestFactory
-	fun `test platform-wide contexts`() = getPlatforms().map(CLPlatform::getDevices).map { it.createContext() }.map(::createPropertyTest)
+	fun `test create single-device context`() = getAllPlatforms()
+			.flatMap { it.getDevices() }
+			.map { d -> dynamicTest("create context from device $d") { d.createContext() } }
 }
