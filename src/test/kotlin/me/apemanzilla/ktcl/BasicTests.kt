@@ -11,7 +11,7 @@ import org.junit.jupiter.api.TestFactory
 
 class BasicTests {
 	@TestFactory
-	fun `test platforms`() = getAllPlatforms().map { p ->
+	fun `test platform and device properties`() = getAllPlatforms().map { p ->
 		dynamicContainer("test platform ${p.name}", listOf(
 				dynamicContainer("test platform properties", evaluateEachProperty(p)),
 				*(p.getDevices().map { d ->

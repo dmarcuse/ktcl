@@ -14,6 +14,13 @@ compileKotlin {
 	}
 }
 
+compileTestKotlin {
+	kotlinOptions {
+		jvmTarget = '1.8'
+		javaParameters = true
+	}
+}
+
 eclipse.project {
 	natures 'org.eclipse.buildship.core.gradleprojectnature'
 	natures 'org.jetbrains.kotlin.core.kotlinNature'

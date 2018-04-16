@@ -8,12 +8,14 @@ class CLOutOfHostMemoryException : CLException(CL_OUT_OF_HOST_MEMORY, "Out of ho
 class CLInvalidValueException : CLException(CL_INVALID_VALUE, "Invalid value")
 class CLDeviceNotAvailableException : CLException(CL_DEVICE_NOT_AVAILABLE, "Device not available")
 class CLDeviceNotFoundException : CLException(CL_DEVICE_NOT_FOUND, "Device not found")
+class CLProgramBuildException(log: String? = null) : CLException(CL_BUILD_PROGRAM_FAILURE, log ?: "No log available")
 
 fun createCLError(code: Int): CLException = when (code) {
 	CL_INVALID_VALUE -> CLInvalidValueException()
 	CL_OUT_OF_HOST_MEMORY -> CLOutOfHostMemoryException()
 	CL_DEVICE_NOT_AVAILABLE -> CLDeviceNotAvailableException()
 	CL_DEVICE_NOT_FOUND -> CLDeviceNotFoundException()
+	CL_BUILD_PROGRAM_FAILURE -> CLProgramBuildException()
 	else -> CLException(code)
 }
 

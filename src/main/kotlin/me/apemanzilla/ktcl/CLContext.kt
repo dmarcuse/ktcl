@@ -39,14 +39,14 @@ class CLContext : CLObject {
 	}
 
 	/**
-	 * Creates a new context containing the given device
+	 * Creates a new context using the given device
 	 *
 	 * @param dev The [CLDevice] this context uses
 	 */
 	constructor(dev: CLDevice) : super(createCtx(listOf(dev)), ::clReleaseContext)
 
 	/**
-	 * Creates a new context containing the given devices
+	 * Creates a new context using the given devices
 	 *
 	 * @param devs The [CLDevice]s this context uses
 	 */
@@ -63,3 +63,8 @@ class CLContext : CLObject {
 	// CL_CONTEXT_D3D10_PREFER_SHARED_RESOURCES
 	// CL_CONTEXT_D3D11_PREFER_SHARED_RESOURCES
 }
+
+/**
+ * Creates a new [CLContext] using these devices
+ */
+fun Iterable<CLDevice>.createContext() = CLContext(this)
