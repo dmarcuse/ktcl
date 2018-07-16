@@ -1,0 +1,43 @@
+plugins {
+	id 'org.jetbrains.kotlin.jvm' version '1.2.51'
+}
+
+group 'me.apemanzilla'
+version '0.1.0'
+
+repositories {
+	mavenLocal()
+	mavenCentral()
+
+	// lwjgl snapshots
+	maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+}
+
+project.ext.lwjglVersion = '3.1.7-SNAPSHOT'
+project.ext.junitVersion = '5.2.0'
+
+dependencies {
+	compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+
+	implementation "org.lwjgl:lwjgl:$lwjglVersion"
+	implementation "org.lwjgl:lwjgl-opencl:$lwjglVersion"
+	implementation "org.lwjgl:lwjgl:$lwjglVersion:natives-windows"
+	implementation "org.lwjgl:lwjgl:$lwjglVersion:natives-linux"
+	implementation "org.lwjgl:lwjgl:$lwjglVersion:natives-macos"
+
+	testCompile "org.junit.jupiter:junit-jupiter-api:$junitVersion"
+	testCompile "org.junit.jupiter:junit-jupiter-params:$junitVersion"
+	testRuntime "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
+}
+
+compileKotlin {
+	kotlinOptions.jvmTarget = "1.8"
+}
+
+compileTestKotlin {
+	kotlinOptions.jvmTarget = "1.8"
+}
+
+test {
+	useJUnitPlatform()
+}
