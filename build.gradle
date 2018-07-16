@@ -1,5 +1,8 @@
 plugins {
 	id 'org.jetbrains.kotlin.jvm' version '1.2.51'
+	id 'org.jetbrains.dokka' version '0.9.17'
+	id 'maven-publish'
+	id 'com.jfrog.bintray' version '1.8.4'
 }
 
 group 'me.apemanzilla'
@@ -40,4 +43,39 @@ compileTestKotlin {
 
 test {
 	useJUnitPlatform()
+}
+
+task sourceJar(type: Jar) {
+	from sourceSets.main.allSource
+	classifier = 'sources'
+
+	group = 'build'
+	description = 'Assembles a jar containing the main sources'
+}
+
+publishing {
+	publications {
+		mavenJava(MavenPublication) {
+			from components.java
+			artifact sourceJar
+		}
+	}
+}
+
+bintray {
+	user = System.getenv('BINTRAY_USER')
+	key = System.getenv('BINTRAY_KEY')
+	pkg {
+		repo = 'maven'
+		name = 'ktcl'
+		licenses = [ 'MIT' ]
+		vcsUrl = 'https://github.com/apemanzilla/ktcl.git'
+		publications = ['mavenJava']
+		publish = true
+
+		version {
+			name = project.version
+			released = new Date()
+		}
+	}
 }
