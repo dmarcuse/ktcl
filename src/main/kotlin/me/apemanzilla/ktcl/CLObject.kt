@@ -9,7 +9,7 @@ import java.nio.ByteBuffer
  */
 abstract class CLObject internal constructor(val handle: Long, infoF: (Long, Int, ByteBuffer?, PointerBuffer?) -> Int) {
 	/** The info wrapper for this [CLObject] */
-	protected val info = CLInfoWrapper(handle, infoF)
+	val info = CLInfoWrapper(handle, infoF)
 
 	/** The name for this [CLObject], using the class name if not overridden */
 	protected open val name: String by lazy { this::class.java.simpleName }
