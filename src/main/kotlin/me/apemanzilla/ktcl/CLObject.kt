@@ -1,25 +1,15 @@
 package me.apemanzilla.ktcl
 
-import org.lwjgl.PointerBuffer
-import java.nio.ByteBuffer
+/** A base OpenCL object */
+abstract class CLObject internal constructor(val handle: Long, infoFn: InfoFunc) {
+	val info = CLInfoWrapper(handle, infoFn)
 
-/**
- * An OpenCL object
- * @param handle The handle for this object
- */
-abstract class CLObject internal constructor(val handle: Long, infoF: (Long, Int, ByteBuffer?, PointerBuffer?) -> Int) {
-	/** The info wrapper for this [CLObject] */
-	val info = CLInfoWrapper(handle, infoF)
+	protected open val releaseFn: (Long) -> Any? = {}
+	protected fun finalize() = releaseFn(handle)
 
-	/** The name for this [CLObject], using the class name if not overridden */
-	protected open val name: String by lazy { this::class.java.simpleName }
+	protected open val descriptor: String by lazy { CLObject::class.java.simpleName }
 
-	/** Called from Object.finalize to release the OpenCL handle if necessary */
-	protected open val releaseFn: ((Long) -> Any?)? = null
-
-	protected fun finalize() = releaseFn?.invoke(handle)
-
-	override fun hashCode() = handle.hashCode()
+	override fun toString() = "$descriptor (0x${handle.toString(16)}"
 	override fun equals(other: Any?) = (other as? CLObject)?.handle == handle
-	override fun toString() = "$name (0x${handle.toString(16)})"
+	override fun hashCode() = handle.hashCode()
 }

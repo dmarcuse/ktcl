@@ -1,9 +1,10 @@
 package me.apemanzilla.ktcl
 
-interface BitField {
-	val mask: Int
-}
+/** Test a bitfield for a given bit */
+fun Long.test(mask: Long) = (this and mask) == mask
 
-infix fun BitField.or(other: Long) = mask.toLong() or other
-infix fun BitField.or(other: BitField) = mask.toLong() or other.mask.toLong()
-infix fun Long.or(other: BitField) = this or other.mask.toLong()
+/** Test a bitfield for a given bit */
+fun Long.test(mask: Int) = (this and mask.toLong()) == mask.toLong()
+
+/** Test a bitfield for a given bit */
+fun Int.test(mask: Int) = (this and mask) == mask

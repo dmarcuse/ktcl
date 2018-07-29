@@ -6,7 +6,7 @@ plugins {
 }
 
 group 'me.apemanzilla'
-version '0.1.1'
+version '0.2.0'
 
 repositories {
 	mavenLocal()
@@ -16,14 +16,15 @@ repositories {
 	maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
 }
 
+;
 project.ext.lwjglVersion = '3.1.7-SNAPSHOT'
 project.ext.junitVersion = '5.2.0'
 
 dependencies {
 	compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
 
-	implementation "org.lwjgl:lwjgl:$lwjglVersion"
-	implementation "org.lwjgl:lwjgl-opencl:$lwjglVersion"
+	compile "org.lwjgl:lwjgl:$lwjglVersion"
+	compile "org.lwjgl:lwjgl-opencl:$lwjglVersion"
 	implementation "org.lwjgl:lwjgl:$lwjglVersion:natives-windows"
 	implementation "org.lwjgl:lwjgl:$lwjglVersion:natives-linux"
 	implementation "org.lwjgl:lwjgl:$lwjglVersion:natives-macos"
