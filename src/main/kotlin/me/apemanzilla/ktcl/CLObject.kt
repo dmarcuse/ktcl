@@ -7,9 +7,9 @@ abstract class CLObject internal constructor(val handle: Long, infoFn: InfoFunc)
 	protected open val releaseFn: (Long) -> Any? = {}
 	protected fun finalize() = releaseFn(handle)
 
-	protected open val descriptor: String by lazy { CLObject::class.java.simpleName }
+	protected open val descriptor: String by lazy { this::class.java.simpleName }
 
-	override fun toString() = "$descriptor (0x${handle.toString(16)}"
+	override fun toString() = "$descriptor (0x${handle.toString(16)})"
 	override fun equals(other: Any?) = (other as? CLObject)?.handle == handle
 	override fun hashCode() = handle.hashCode()
 }

@@ -18,7 +18,7 @@ class CLException internal constructor(val code: Int, message: String? = null)
 		fun checkErr(err: Int) = checkErr(err) { null }
 
 		inline fun <T> checkErr(block: (IntBuffer) -> T): T {
-			val errBuf = BufferUtils.createIntBuffer(1).put(CL_SUCCESS)
+			val errBuf = BufferUtils.createIntBuffer(1).put(CL_SUCCESS).apply { flip() }
 			val result = block(errBuf)
 			checkErr(errBuf[0])
 			return result

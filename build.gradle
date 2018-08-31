@@ -1,5 +1,5 @@
 plugins {
-	id 'org.jetbrains.kotlin.jvm' version '1.2.51'
+	id 'org.jetbrains.kotlin.jvm' version '1.2.61'
 	id 'org.jetbrains.dokka' version '0.9.17'
 	id 'maven-publish'
 	id 'com.jfrog.bintray' version '1.8.4'
@@ -16,7 +16,6 @@ repositories {
 	maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
 }
 
-;
 project.ext.lwjglVersion = '3.1.7-SNAPSHOT'
 project.ext.junitVersion = '5.2.0'
 
@@ -25,9 +24,9 @@ dependencies {
 
 	compile "org.lwjgl:lwjgl:$lwjglVersion"
 	compile "org.lwjgl:lwjgl-opencl:$lwjglVersion"
-	implementation "org.lwjgl:lwjgl:$lwjglVersion:natives-windows"
-	implementation "org.lwjgl:lwjgl:$lwjglVersion:natives-linux"
-	implementation "org.lwjgl:lwjgl:$lwjglVersion:natives-macos"
+	compile "org.lwjgl:lwjgl:$lwjglVersion:natives-windows"
+	compile "org.lwjgl:lwjgl:$lwjglVersion:natives-linux"
+	compile "org.lwjgl:lwjgl:$lwjglVersion:natives-macos"
 
 	testCompile "org.junit.jupiter:junit-jupiter-api:$junitVersion"
 	testCompile "org.junit.jupiter:junit-jupiter-params:$junitVersion"
@@ -44,6 +43,7 @@ compileTestKotlin {
 
 test {
 	useJUnitPlatform()
+	outputs.upToDateWhen { false }
 }
 
 task sourceJar(type: Jar) {

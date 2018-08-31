@@ -6,8 +6,10 @@ import me.apemanzilla.ktcl.CLException.Companion.checkErr
 import me.apemanzilla.ktcl.CLInfoWrapper
 import me.apemanzilla.ktcl.CLProgram
 import me.apemanzilla.ktcl.CLProgram.BuildInfo
+import me.apemanzilla.ktcl.cl10.BuildStatus.*
 import org.lwjgl.opencl.CL10.*
 import org.lwjgl.system.MemoryUtil
+import org.lwjgl.system.MemoryUtil.NULL
 import java.nio.ByteBuffer
 
 val CLProgram.context get() = info.pointer(CL_PROGRAM_CONTEXT).let { CLContext(it, true) }
@@ -16,15 +18,16 @@ val CLProgram.devices get() = info.pointers(CL_PROGRAM_DEVICES).map { CLDevice(i
 val CLProgram.source get() = info.ascii(CL_PROGRAM_SOURCE)
 val CLProgram.binarySizes get() = info.size_ts(CL_PROGRAM_BINARY_SIZES)
 
-val CLProgram.binaries get(): Map<CLDevice, ByteBuffer> {
-	val devs = devices
-	val sizes = binarySizes
-	val ptrs = info.pointers(CL_PROGRAM_BINARIES)
+val CLProgram.binaries
+	get(): Map<CLDevice, ByteBuffer> {
+		val devs = devices
+		val sizes = binarySizes
+		val ptrs = info.pointers(CL_PROGRAM_BINARIES)
 
-	return devs.mapIndexed { i, d ->
-		d to MemoryUtil.memByteBuffer(ptrs[i], sizes[i].toInt())
-	}.toMap()
-}
+		return devs.mapIndexed { i, d ->
+			d to MemoryUtil.memByteBuffer(ptrs[i], sizes[i].toInt())
+		}.toMap()
+	}
 
 fun CLProgram.getBuildInfo(device: CLDevice) = BuildInfo(CLInfoWrapper { i, b, p -> clGetProgramBuildInfo(handle, device.handle, i, b, p) })
 
@@ -37,6 +40,22 @@ fun CLContext.createProgramWithSource(vararg sources: String) = checkErr { err -
 	require(validSources.isNotEmpty()) { "At least one non-empty source must be passed" }
 
 	CLProgram(clCreateProgramWithSource(handle, validSources.toTypedArray(), err), false)
+}
+
+fun CLProgram.build(options: String? = null): CLProgram {
+	checkErr(clBuildProgram(handle, null, options ?: "", null, NULL)) { errCode ->
+		when (errCode) {
+			CL_BUILD_PROGRAM_FAILURE -> {
+				val (dev, info) = devices.map { d -> Pair(d, getBuildInfo(d)) }.first { (_, i) -> i.status == Error }
+
+				return@checkErr "Build Error for device $dev: ${info.log}"
+			}
+
+			else -> null
+		}
+	}
+
+	return this
 }
 
 // TODO: clCreateProgramWithBinary
