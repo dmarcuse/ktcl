@@ -1,9 +1,28 @@
-plugins {
-	id 'org.jetbrains.kotlin.jvm' version '1.2.61'
-	id 'org.jetbrains.dokka' version '0.9.17'
-	id 'maven-publish'
-	id 'com.jfrog.bintray' version '1.8.4'
+//plugins {
+//	id 'org.jetbrains.kotlin.jvm' version '1.2.61'
+//	id 'org.jetbrains.dokka' version '0.9.17'
+//	id 'maven-publish'
+//	id 'com.jfrog.bintray' version '1.8.4'
+//}
+
+buildscript {
+	repositories {
+		mavenCentral()
+		maven { url 'https://plugins.gradle.org/m2/' }
+		maven { url 'http://dl.bintray.com/kotlin/kotlin-eap' }
+	}
+
+	dependencies {
+		classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.3-M2'
+		classpath 'org.jetbrains.dokka:dokka-gradle-plugin:0.9.17'
+		classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4'
+	}
 }
+
+apply plugin: 'org.jetbrains.kotlin.jvm'
+apply plugin: 'org.jetbrains.dokka'
+apply plugin: 'maven-publish'
+apply plugin: 'com.jfrog.bintray'
 
 group 'me.apemanzilla'
 version '0.2.0'
@@ -14,6 +33,9 @@ repositories {
 
 	// lwjgl snapshots
 	maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+
+	// kotlin snapshots
+	maven { url 'http://dl.bintray.com/kotlin/kotlin-eap' }
 }
 
 project.ext.lwjglVersion = '3.1.7-SNAPSHOT'
