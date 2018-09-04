@@ -27,7 +27,7 @@ apply plugin: 'maven-publish'
 apply plugin: 'com.jfrog.bintray'
 
 group 'me.apemanzilla'
-version '0.2.0'
+version '0.2.0-alpha'
 
 repositories {
 	mavenLocal()
