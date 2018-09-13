@@ -6,7 +6,7 @@ interface MemFlag {
 	val mask: Int
 
 	operator fun plus(other: MemFlag) = object : MemFlag {
-		override val mask = this@MemFlag.mask and other.mask
+		override val mask = this@MemFlag.mask or other.mask
 	}
 }
 
