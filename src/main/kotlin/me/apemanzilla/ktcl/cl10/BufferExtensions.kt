@@ -16,6 +16,8 @@ import java.nio.ByteBuffer
  */
 fun CLContext.createBuffer(data: ByteBuffer, flags: MemFlag = ReadWrite) = checkErr { e ->
 	require(data.isDirect) { "Data buffer must be direct" }
+	data.rewind()
+
 	CLBuffer(clCreateBuffer(handle, flags.mask.toLong(), data, e), false)
 }
 
@@ -37,6 +39,7 @@ fun CLCommandQueue.enqueueReadBuffer(
 		offset: Long = 0,
 		blocking: Boolean = true): CLEvent {
 	require(to.isDirect) { "Data buffer must be direct" }
+	to.rewind()
 
 	val eventBuf = BufferUtils.createPointerBuffer(1)
 	checkErr(clEnqueueReadBuffer(handle, from.handle, blocking, offset, to, null, eventBuf))
@@ -54,6 +57,7 @@ fun CLCommandQueue.enqueueWriteBuffer(
 		blocking: Boolean = true
 ): CLEvent {
 	require(from.isDirect) { "Data buffer must be direct" }
+	from.rewind()
 
 	val eventBuf = BufferUtils.createPointerBuffer(1)
 	checkErr(clEnqueueWriteBuffer(handle, to.handle, blocking, offset, from, null, eventBuf))

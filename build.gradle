@@ -6,7 +6,7 @@ plugins {
 }
 
 group 'me.apemanzilla'
-version '0.2.0-alpha'
+version '0.2.0-alpha2'
 
 repositories {
 	mavenLocal()
